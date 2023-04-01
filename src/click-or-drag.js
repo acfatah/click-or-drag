@@ -43,25 +43,67 @@ export class ClickOrDrag {
     /** @type {boolean} */
     this.isClick = false
 
-    this.element.addEventListener('mousedown', this.mousedownListener.bind(this))
-    this.element.addEventListener('mouseup', this.mouseupListener.bind(this))
+    /** @type {Function[]} */
+    this.clickListeners = []
+
+    /** @type {Function[]} */
+    this.dragListeners = []
+
+    this.element.addEventListener('mousedown', this._mousedownListener.bind(this))
+    this.element.addEventListener('mouseup', this._mouseupListener.bind(this))
   }
 
   /** @param {MouseEvent} event */
-  mousedownListener (event) {
+  _mousedownListener (event) {
     this.isClick = false
     this.startPosition.x = event.clientX
     this.startPosition.y = event.clientY
   }
 
   /** @param {MouseEvent} event */
-  mouseupListener (event) {
+  _mouseupListener (event) {
     this.delta.x = Math.abs(event.clientX - this.startPosition.x)
     this.delta.y = Math.abs(event.clientY - this.startPosition.y)
 
     this.isClick = this.options.button === this.button &&
       this.delta.x < this.options.threshold &&
       this.delta.y < this.options.threshold
+
+    if (this.isClick) {
+      this._triggerClickListeners(event)
+    } else {
+      this._triggerDragListeners(event)
+    }
+  }
+
+  /** @param {Event} event */
+  _triggerClickListeners (event) {
+    for (const listener of this.clickListeners) {
+      listener(event)
+    }
+  }
+
+  /** @param {Event} event */
+  _triggerDragListeners (event) {
+    for (const listener of this.dragListeners) {
+      listener(event)
+    }
+  }
+
+  onClick (listener) {
+    this.clickListeners.push(listener)
+  }
+
+  onDrag (listener) {
+    this.dragListeners.push(listener)
+  }
+
+  offClick (listener) {
+    this.clickListeners = this.clickListeners.filter(current => current !== listener)
+  }
+
+  offDrag (listener) {
+    this.dragListeners = this.dragListeners.filter(current => current !== listener)
   }
 }
 
