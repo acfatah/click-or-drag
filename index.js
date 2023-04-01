@@ -1,1 +1,1 @@
-export { ClickOrDrag } from './src/click-or-drag'
+export { ClickOrDrag } from './src/click-or-drag.js'
